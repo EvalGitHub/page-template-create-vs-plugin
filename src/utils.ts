@@ -16,51 +16,20 @@ export function isDirectory(filePath: string) {
   }
 }
 
-/**
- * 根据git仓库制定文件路径在目标文件夹下创建文件
-*/
-export function createFileFromGit(filePath: string, targetDir: string) {
-  try {
-    const fileContent = fs.readFileSync(filePath, "utf8");
-    const fileName = path.basename(filePath);
-    const targetFilePath = path.join(targetDir, fileName);
-    fs.writeFileSync(targetFilePath, fileContent);
-    console.log(`已创建文件: ${targetFilePath}`);
-  } catch (err) {
-    console.error("创建文件时出错:", err);
-  }
-}
-
 export function openUrl(value:string) {
   const uri = vscode.Uri.parse(value);
   vscode.env.openExternal(uri);
 }
 
-export function downloadFile(url:string, targetDir:string, callback?:any) { 
-  download(
-    url,
-    targetDir,
-    { clone: false }, // 使用 HTTPS 下载，不使用 git clone
-    (err:any) => {
-      if (err) {
-        console.error("❌ 下载失败:", err);
-        vscode.window.showErrorMessage("❌ 下载失败");
-      } else {
-        vscode.window.showInformationMessage("✅ 下载成功");
-        callback && callback();
-      }
-    }
-  );
-}
-
 export async function downloadGitHubDirectory(
   targetDir: string,
+  baseUrlInfo: any,
   callback?: any
 ) {
   // 固定的 GitHub API 地址（当前目录）
-  const baseUrl =
-    "https://api.github.com/repos/EvalGitHub/template-for-page/contents/src/page/common-list?ref=main";
-
+  // const baseUrl =
+  //   "https://api.github.com/repos/EvalGitHub/template-for-page/contents/src/page/common-list?ref=main";
+  const baseUrl = `${baseUrlInfo.gitDownloadUrl}/${baseUrlInfo.dirPath}?ref=${baseUrlInfo.branch}`;
   // 本地保存的目标目录
   const targetRoot = path.resolve(targetDir); // 根输出目录
   async function downloadDir(url:string, localDir:string) {
@@ -91,7 +60,7 @@ export async function downloadGitHubDirectory(
           // 处理目录：递归下载
           console.log(`📁 进入目录: ${item.path}`);
           // 递归调用，使用新的 API URL
-          const subdirUrl = `https://api.github.com/repos/EvalGitHub/template-for-page/contents/${item.path}?ref=main`;
+          const subdirUrl = `${baseUrlInfo.gitDownloadUrl}/${item.path}?ref=${baseUrlInfo.branch}`;
           await downloadDir(subdirUrl, localPath); // 递归
         }
       }

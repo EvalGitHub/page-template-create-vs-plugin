@@ -14,6 +14,10 @@ export const mockData = [
     updatedAt: "2025-08-01",
     gitUrl:
       "https://github.com/EvalGitHub/template-for-page/tree/main/src/page/common-list",
+    gitDownloadUrl:
+      "https://api.github.com/repos/EvalGitHub/template-for-page/contents",
+    dirPath: "src/page/common-list",
+    branch: 'main',
     key: "common-list",
   },
 ];

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import fs from "fs";
-import path from "path";
-import { isDirectory, downloadFile, downloadGitHubDirectory } from "./utils";
+import { isDirectory, downloadGitHubDirectory } from "./utils";
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
   return {
@@ -96,7 +95,7 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
     this._webPanelView?.webview.onDidReceiveMessage(async (data) => {
       const {actionName} = data;
       if(actionName === 'createPage') {
-        const { installPath, gitUrl, pageName } = data?.value;
+        const { installPath, pageName } = data?.value;
         const targetDir = installPath;// path.join(installPath, pageName);
         // 检查 installPath/pageName文件夹是否存在，存在则结束，提示存在同名文件夹，不存在就创建文件夹继续
         if (fs.existsSync(targetDir)) {
@@ -109,7 +108,7 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
           return;
         } else {
           fs.mkdirSync(targetDir);
-          downloadGitHubDirectory(targetDir, (data: any) => {
+          downloadGitHubDirectory(targetDir,  data.value, (data: any) => {
             const { msg, actionFlag } = data;
             if (actionFlag === "success") {
               vscode.window.showInformationMessage(msg);
@@ -125,12 +124,6 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
           });
         }
       }
-      
-  /*     downloadFile(gitUrl, installPath, (err: any) => {
-        if (err) {
-          console.log(err);
-        }
-      }); */
     });
   }
 }

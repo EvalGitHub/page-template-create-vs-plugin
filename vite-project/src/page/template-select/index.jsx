@@ -23,6 +23,7 @@ export default function TemplateSelect() {
   const [data] = useState(mockData);
   const [curPath, setCurPath] = useState("");
   const [loading, setLoading] = useState(false);
+  const [curTargetRecord ,setCurTargetRecord]= useState({});
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -89,6 +90,7 @@ export default function TemplateSelect() {
       template: item,
       gitUrl: item.gitUrl,
     });
+    setCurTargetRecord(item);
     setModalVisible(true);
   }
 
@@ -98,7 +100,13 @@ export default function TemplateSelect() {
 
   function handleModalOk() {
     form.validateFields().then((value) => {
-      createPageHandle({ value, actionName: "createPage" });
+      createPageHandle({
+        value: {
+          ...value,
+          ...curTargetRecord,
+        },
+        actionName: "createPage",
+      });
       // setModalVisible(false);
     });
   }
