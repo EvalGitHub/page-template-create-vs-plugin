@@ -10,11 +10,11 @@ export const mockData = [
   {
     id: 1,
     name: "基础列表",
-    maintainer: "维护人1",
-    updatedAt: "2025-08-01",
     gitUrl:
       "https://github.com/EvalGitHub/template-for-page/tree/main/src/page/common-list",
-    gitDownloadUrl:
+      // 这是git提供的默认资源下载链接
+      //  "https://api.github.com/repos/EvalGitHub/template-for-page/contents/src/page/common-list?ref=main"
+      gitDownloadUrl:
       "https://api.github.com/repos/EvalGitHub/template-for-page/contents",
     dirPath: "src/page/common-list",
     branch: 'main',

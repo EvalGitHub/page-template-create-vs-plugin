@@ -41,15 +41,22 @@ export default function TemplateSelect() {
       key: "name",
     },
     {
-      title: "维护人",
-      dataIndex: "maintainer",
-      key: "maintainer",
+      title: "资源下载基础链接",
+      dataIndex: "gitDownloadUrl",
+      key: "gitDownloadUrl", 
+      width: "100px",  
     },
     {
-      title: "更新时间",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
+      title:"文件资源路径",
+      dataIndex: "dirPath",
+      key: "dirPath",   
     },
+    {
+      title:"分支",
+      dataIndex: "branch",
+      key: "branch",   
+    },  
+  
     {
       title: "操作",
       key: "action",
