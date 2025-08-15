@@ -1,9 +1,7 @@
 import * as vscode from "vscode";
 import fs from "fs";
-import {
-  isDirectory,
-  downloadFile,
-} from "./utils";
+import path from "path";
+import { isDirectory, downloadFile, downloadGitHubDirectory } from "./utils";
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
   return {
@@ -96,14 +94,43 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
       },
     });
     this._webPanelView?.webview.onDidReceiveMessage(async (data) => {
-      console.log(data);
-      const { installPath, gitUrl } = data?.value;
-      //
-      downloadFile(gitUrl, installPath, (err: any) => {
+      const {actionName} = data;
+      if(actionName === 'createPage') {
+        const { installPath, gitUrl, pageName } = data?.value;
+        const targetDir = installPath;// path.join(installPath, pageName);
+        // 检查 installPath/pageName文件夹是否存在，存在则结束，提示存在同名文件夹，不存在就创建文件夹继续
+        if (fs.existsSync(targetDir)) {
+          vscode.window.showInformationMessage(
+            `${pageName} 文件夹已存在,请更换目录或者文件名`
+          );
+          this._webPanelView?.webview.postMessage({
+            type: "createPageFail",
+          });
+          return;
+        } else {
+          fs.mkdirSync(targetDir);
+          downloadGitHubDirectory(targetDir, (data: any) => {
+            const { msg, actionFlag } = data;
+            if (actionFlag === "success") {
+              vscode.window.showInformationMessage(msg);
+              this._webPanelView?.webview.postMessage({
+                type: "createPageSuccess",
+              });
+            } else {
+              vscode.window.showErrorMessage(msg);
+              this._webPanelView?.webview.postMessage({
+                type: "createPageFail",
+              });
+            }
+          });
+        }
+      }
+      
+  /*     downloadFile(gitUrl, installPath, (err: any) => {
         if (err) {
           console.log(err);
         }
-      });
+      }); */
     });
   }
 }

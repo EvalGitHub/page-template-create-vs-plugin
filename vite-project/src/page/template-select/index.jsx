@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Table, Input, Button, Space, Modal, Form, Select } from "antd";
 import { mockData } from "./config";
+import {debounce } from '@/utils';
 
 let vscodeApi = null;
 
@@ -21,6 +22,7 @@ export default function TemplateSelect() {
   const vscode = useRef(getVsCodeApi()).current;
   const [data] = useState(mockData);
   const [curPath, setCurPath] = useState("");
+  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -80,7 +82,6 @@ export default function TemplateSelect() {
   }
 
   function handleUseTemplate(item) {
-    debugger
     form.setFieldsValue({
       templateName: item.name,
       installPath: curPath,
@@ -98,12 +99,13 @@ export default function TemplateSelect() {
   function handleModalOk() {
     form.validateFields().then((value) => {
       createPageHandle({ value, actionName: "createPage" });
-      setModalVisible(false);
+      // setModalVisible(false);
     });
   }
 
   function createPageHandle({ value, actionName }) {
     if (typeof vscode !== "undefined" && vscode.postMessage) {
+      setLoading(true);
       vscode.postMessage({ actionName, value });
     } else {
       console.warn("vscode 对象不可用，可能不在 VS Code 环境中");
@@ -118,14 +120,21 @@ export default function TemplateSelect() {
   //   }
   // }
  
-                
-
   function handleTableChange(pag) {
     setPagination({
       ...pagination,
       current: pag.current,
       pageSize: pag.pageSize,
     });
+  }
+
+  function changePageName(e) {
+    // 实现一个防抖函数
+    debounce(() => {
+     form.setFieldsValue({
+       installPath: `${curPath}/${e.target.value}`,
+     });
+    }, 500)()
   }
 
   useEffect(() => {
@@ -137,6 +146,13 @@ export default function TemplateSelect() {
           break;
         case "getPageDirs":
           console.log("getPages", data);
+          break;
+        case "createPageSuccess":
+          setLoading(false);
+          setModalVisible(false);
+          break;
+        case "createPageFail":
+          setLoading(false);
           break;
       }
     });
@@ -201,7 +217,8 @@ export default function TemplateSelect() {
         visible={modalVisible}
         onCancel={handleModalCancel}
         onOk={handleModalOk}
-        okText="确认"
+        confirmLoading={loading}
+        okText={loading ? "正在创建中..." : "确认"}
         cancelText="取消"
       >
         <Form form={form} layout="vertical">
@@ -228,7 +245,7 @@ export default function TemplateSelect() {
             name="pageName"
             rules={[{ required: true, message: "请输入页面名称" }]}
           >
-            <Input placeholder="页面名称：文件夹名称，建议使用aaa-bbb-ccc格式" />
+            <Input placeholder="页面名称：文件夹名称，建议使用aaa-bbb-ccc格式" onChange={changePageName}/>
           </Form.Item>
         </Form>
       </Modal>
