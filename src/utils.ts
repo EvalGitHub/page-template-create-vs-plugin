@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import * as vscode from "vscode";
-import download from 'download-git-repo';
 import axios from 'axios';
 
 
